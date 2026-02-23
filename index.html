@@ -8,778 +8,757 @@
 <title>Fish & Grip 🎣</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabin:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ocean:#0a1628;--deep:#050d1a;--wave:#0e4d6e;
+  --foam:#64d4f2;--sun:#f7c948;--hook:#e8654a;
+  --light:#e8f4f8;--card:rgba(14,77,110,0.35);
+  --border:rgba(100,212,242,0.2);--r:14px
+}
+html,body{height:100%;overflow:hidden;background:var(--deep);font-family:'Cabin',sans-serif;color:var(--light);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 20% 0%,#0e4d6e 0%,#0a1628 50%,#050d1a 100%);overflow:hidden}
+#bg::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(100,212,242,0.08) 0%,transparent 50%),radial-gradient(circle at 10% 80%,rgba(247,201,72,0.05) 0%,transparent 40%)}
+.bubble{position:absolute;border-radius:50%;background:rgba(100,212,242,0.06);animation:rise linear infinite}
+@keyframes rise{0%{transform:translateY(110vh) scale(0.4);opacity:0}10%{opacity:1}90%{opacity:.6}100%{transform:translateY(-20vh) scale(1);opacity:0}}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;transition:opacity .4s ease,transform .4s ease}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(.97)}
 
-  :root {
-    --ocean: #0a1628;
-    --deep: #050d1a;
-    --wave: #0e4d6e;
-    --foam: #64d4f2;
-    --sun: #f7c948;
-    --hook: #e8654a;
-    --light: #e8f4f8;
-    --card: rgba(14,77,110,0.35);
-    --border: rgba(100,212,242,0.2);
-    --r: 14px;
-  }
+/* TITLE */
+.logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:28px}
+.logo-fish{font-size:72px;filter:drop-shadow(0 0 28px rgba(100,212,242,.5));animation:fishbob 3s ease-in-out infinite;display:block;line-height:1}
+@keyframes fishbob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-12px) rotate(3deg)}}
+.logo-title{font-family:'Bebas Neue',sans-serif;font-size:58px;letter-spacing:4px;color:var(--foam);text-shadow:0 0 40px rgba(100,212,242,.4),0 4px 0 rgba(0,0,0,.4);line-height:.9;margin-top:8px}
+.logo-sub{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--sun);opacity:.9;margin-top:6px;font-weight:700}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:360px;margin-bottom:20px}
+.mode-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.mode-card:active{transform:scale(.95);background:rgba(100,212,242,.12)}
+.mode-icon{font-size:46px}
+.mode-label{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--foam);text-align:center}
+.mode-desc{font-size:10px;color:rgba(232,244,248,.55);text-align:center;letter-spacing:.3px;line-height:1.4}
+.waterline{width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--foam),transparent);opacity:.3;margin:16px 0;max-width:360px}
+.perm-note{text-align:center;font-size:11px;color:rgba(232,244,248,.35);letter-spacing:.3px;line-height:1.5;max-width:320px}
 
-  html, body {
-    height: 100%;
-    overflow: hidden;
-    background: var(--deep);
-    font-family: 'Cabin', sans-serif;
-    color: var(--light);
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
+/* CAMERA */
+#cameraScreen{padding:0;justify-content:flex-end}
+#videoEl{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.cam-overlay{position:relative;z-index:20;width:100%;padding:16px 24px 44px;background:linear-gradient(to top,rgba(5,13,26,.95) 0%,rgba(5,13,26,.5) 60%,transparent 100%);display:flex;flex-direction:column;align-items:center;gap:14px}
+.cam-hint{font-size:13px;color:rgba(232,244,248,.85);text-align:center;letter-spacing:.4px;background:rgba(0,0,0,.4);border-radius:20px;padding:6px 16px}
+.cam-controls{display:flex;align-items:center;justify-content:center;gap:28px;width:100%}
+.btn-shutter{width:80px;height:80px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,.5);box-shadow:0 0 0 3px rgba(255,255,255,.2),0 4px 20px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s;-webkit-tap-highlight-color:transparent}
+.btn-shutter:active{transform:scale(.92)}
+.btn-shutter-inner{width:60px;height:60px;border-radius:50%;background:#fff;box-shadow:inset 0 2px 6px rgba(0,0,0,.15)}
+.btn-round{width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.btn-round:active{transform:scale(.92);background:rgba(255,255,255,.1)}
 
-  /* ── BACKGROUND ── */
-  #bg {
-    position: fixed; inset: 0; z-index: 0;
-    background: radial-gradient(ellipse at 20% 0%, #0e4d6e 0%, #0a1628 50%, #050d1a 100%);
-    overflow: hidden;
-  }
-  #bg::before {
-    content: '';
-    position: absolute; inset: 0;
-    background:
-      radial-gradient(circle at 80% 20%, rgba(100,212,242,0.08) 0%, transparent 50%),
-      radial-gradient(circle at 10% 80%, rgba(247,201,72,0.05) 0%, transparent 40%);
-  }
-  .bubble {
-    position: absolute; border-radius: 50%;
-    background: rgba(100,212,242,0.06);
-    animation: rise linear infinite;
-  }
-  @keyframes rise {
-    0% { transform: translateY(110vh) scale(0.4); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 0.6; }
-    100% { transform: translateY(-20vh) scale(1); opacity: 0; }
-  }
+/* FLASH */
+#flash{position:fixed;inset:0;z-index:999;background:#fff;opacity:0;pointer-events:none;transition:opacity .08s}
 
-  /* ── SCREENS ── */
-  .screen {
-    position: fixed; inset: 0; z-index: 10;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 28px 24px;
-    transition: opacity 0.4s ease, transform 0.4s ease;
-  }
-  .screen.hidden {
-    opacity: 0; pointer-events: none;
-    transform: scale(0.97);
-  }
+/* RESULT */
+#resultScreen{padding:0;justify-content:flex-end;background:#000}
+#resultCanvas{position:fixed;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.result-overlay{position:relative;z-index:20;width:100%;padding:14px 18px 40px;background:linear-gradient(to top,rgba(5,13,26,.97) 0%,rgba(5,13,26,.6) 60%,transparent 100%);display:flex;flex-direction:column;align-items:center;gap:11px}
+.section-lbl{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--foam);text-align:center}
+.fish-picker{display:flex;gap:9px;width:100%;padding:3px 0;justify-content:center;flex-wrap:wrap}
+.fish-opt{font-size:32px;cursor:pointer;background:rgba(14,77,110,.4);border:2px solid transparent;border-radius:10px;padding:5px 7px;transition:all .15s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.fish-opt.selected{border-color:var(--foam);background:rgba(100,212,242,.15);transform:scale(1.1)}
+.fish-opt:active{transform:scale(.95)}
+.size-row{display:flex;align-items:center;gap:12px;width:100%}
+.size-lbl{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:var(--foam);white-space:nowrap}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:rgba(100,212,242,.25);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--foam);box-shadow:0 2px 8px rgba(0,0,0,.4);cursor:pointer}
+.result-btns{display:flex;gap:12px;width:100%}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px 18px;border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.97)}
+.btn-save{flex:1;background:linear-gradient(135deg,#f7c948,#e8a820);color:#0a1628;box-shadow:0 4px 20px rgba(247,201,72,.35)}
+.btn-retake{background:rgba(14,77,110,.6);border:1px solid var(--border);color:var(--light);font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;padding:14px 18px;border-radius:10px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.btn-retake:active{transform:scale(.97)}
 
-  /* ── TITLE SCREEN ── */
-  #titleScreen { gap: 0; }
-
-  .logo-wrap {
-    display: flex; flex-direction: column; align-items: center;
-    margin-bottom: 36px;
-  }
-  .logo-fish {
-    font-size: 88px;
-    filter: drop-shadow(0 0 28px rgba(100,212,242,0.5));
-    animation: fishbob 3s ease-in-out infinite;
-    display: block; line-height: 1;
-  }
-  @keyframes fishbob {
-    0%,100% { transform: translateY(0) rotate(-3deg); }
-    50% { transform: translateY(-12px) rotate(3deg); }
-  }
-  .logo-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 62px; letter-spacing: 4px;
-    color: var(--foam);
-    text-shadow: 0 0 40px rgba(100,212,242,0.4), 0 4px 0 rgba(0,0,0,0.4);
-    line-height: 0.9; margin-top: 8px;
-  }
-  .logo-sub {
-    font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
-    color: var(--sun); opacity: 0.9; margin-top: 6px;
-    font-weight: 700;
-  }
-
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    padding: 20px;
-    width: 100%; max-width: 360px;
-  }
-  .card-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px; letter-spacing: 2px;
-    color: var(--foam); margin-bottom: 10px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .card-body {
-    font-size: 13px; line-height: 1.6;
-    color: rgba(232,244,248,0.7);
-    margin-bottom: 16px;
-  }
-
-  .btn {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; padding: 16px 20px;
-    border: none; border-radius: 10px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px; letter-spacing: 2px;
-    cursor: pointer; transition: all 0.18s ease;
-    position: relative; overflow: hidden;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn::after {
-    content: ''; position: absolute; inset: 0;
-    background: rgba(255,255,255,0);
-    transition: background 0.15s;
-  }
-  .btn:active::after { background: rgba(255,255,255,0.1); }
-
-  .btn-primary {
-    background: linear-gradient(135deg, #1ab8e8, #0e90c0);
-    color: #fff;
-    box-shadow: 0 4px 24px rgba(26,184,232,0.4), 0 2px 0 rgba(0,0,0,0.3);
-  }
-  .btn-primary:active { transform: scale(0.97); }
-
-  .btn-icon { font-size: 26px; }
-
-  .permission-note {
-    text-align: center; font-size: 11px;
-    color: rgba(232,244,248,0.45);
-    margin-top: 12px; line-height: 1.5;
-    letter-spacing: 0.3px;
-  }
-
-  .waterline {
-    width: 100%; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--foam), transparent);
-    opacity: 0.3; margin: 20px 0;
-    max-width: 360px;
-  }
-
-  /* ── CAMERA SCREEN ── */
-  #cameraScreen { padding: 0; justify-content: flex-end; }
-
-  #videoEl {
-    position: fixed; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1); /* mirror selfie */
-    background: #000;
-  }
-
-  .cam-overlay {
-    position: relative; z-index: 20;
-    width: 100%; padding: 20px 24px 40px;
-    background: linear-gradient(to top, rgba(5,13,26,0.95) 0%, rgba(5,13,26,0.5) 60%, transparent 100%);
-    display: flex; flex-direction: column; align-items: center; gap: 16px;
-  }
-  .cam-hint {
-    font-size: 13px; color: rgba(232,244,248,0.8);
-    text-align: center; letter-spacing: 0.5px;
-    background: rgba(0,0,0,0.4); border-radius: 20px;
-    padding: 6px 16px;
-  }
-  .cam-controls {
-    display: flex; align-items: center; justify-content: center; gap: 28px;
-    width: 100%;
-  }
-  .btn-shutter {
-    width: 80px; height: 80px; border-radius: 50%;
-    background: #fff;
-    border: 5px solid rgba(255,255,255,0.5);
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.2), 0 4px 20px rgba(0,0,0,0.5);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: transform 0.12s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn-shutter:active { transform: scale(0.92); }
-  .btn-shutter-inner {
-    width: 60px; height: 60px; border-radius: 50%;
-    background: #fff;
-    box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
-  }
-  .btn-round {
-    width: 52px; height: 52px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.3);
-    background: rgba(0,0,0,0.4);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; cursor: pointer;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn-round:active { transform: scale(0.92); background: rgba(255,255,255,0.1); }
-
-  /* ── FLASH ── */
-  #flash {
-    position: fixed; inset: 0; z-index: 999;
-    background: #fff;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.08s;
-  }
-
-  /* ── RESULT SCREEN ── */
-  #resultScreen { padding: 0; justify-content: flex-end; background: #000; }
-
-  #resultCanvas {
-    position: fixed; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: contain;
-    background: #000;
-  }
-
-  .result-overlay {
-    position: relative; z-index: 20;
-    width: 100%; padding: 16px 20px 40px;
-    background: linear-gradient(to top, rgba(5,13,26,0.97) 0%, rgba(5,13,26,0.6) 60%, transparent 100%);
-    display: flex; flex-direction: column; align-items: center; gap: 12px;
-  }
-
-  .fish-picker-label {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 15px; letter-spacing: 2px; color: var(--foam);
-    text-align: center;
-  }
-  .fish-picker {
-    display: flex; gap: 10px;
-    overflow-x: auto; width: 100%; padding: 4px 0;
-    scrollbar-width: none; -ms-overflow-style: none;
-    justify-content: center; flex-wrap: wrap;
-  }
-  .fish-picker::-webkit-scrollbar { display: none; }
-  .fish-opt {
-    font-size: 36px; cursor: pointer;
-    background: rgba(14,77,110,0.4);
-    border: 2px solid transparent;
-    border-radius: 10px; padding: 6px 8px;
-    transition: all 0.15s;
-    flex-shrink: 0;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .fish-opt.selected {
-    border-color: var(--foam);
-    background: rgba(100,212,242,0.15);
-    transform: scale(1.1);
-  }
-  .fish-opt:active { transform: scale(0.95); }
-
-  .result-btns {
-    display: flex; gap: 12px; width: 100%;
-  }
-  .btn-save {
-    flex: 1;
-    background: linear-gradient(135deg, #f7c948, #e8a820);
-    color: #0a1628;
-    box-shadow: 0 4px 20px rgba(247,201,72,0.35);
-  }
-  .btn-retake {
-    background: rgba(14,77,110,0.6);
-    border: 1px solid var(--border);
-    color: var(--light);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px; letter-spacing: 1px;
-    padding: 14px 20px; border-radius: 10px;
-    cursor: pointer; transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    white-space: nowrap;
-  }
-  .btn-retake:active { transform: scale(0.97); }
-
-  /* ── SIZE SLIDER ── */
-  .size-row {
-    display: flex; align-items: center; gap: 12px;
-    width: 100%;
-  }
-  .size-lbl {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 14px; letter-spacing: 1px; color: var(--foam);
-    white-space: nowrap;
-  }
-  input[type=range] {
-    flex: 1; -webkit-appearance: none;
-    height: 4px; border-radius: 2px;
-    background: rgba(100,212,242,0.25);
-    outline: none;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--foam);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    cursor: pointer;
-  }
-
-  /* ── SAVE STATUS ── */
-  #saveStatus {
-    position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%);
-    z-index: 100;
-    background: rgba(5,13,26,0.92);
-    border: 1px solid var(--foam);
-    border-radius: 24px; padding: 10px 22px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px; letter-spacing: 2px; color: var(--foam);
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.3s;
-    white-space: nowrap;
-  }
-  #saveStatus.show { opacity: 1; }
-
-  /* ── ERROR ── */
-  #errorMsg {
-    position: fixed; bottom: 100px; left: 24px; right: 24px;
-    z-index: 200;
-    background: rgba(232,101,74,0.95);
-    border-radius: 12px; padding: 14px 18px;
-    font-size: 13px; line-height: 1.5; color: #fff;
-    text-align: center;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.3s;
-  }
-  #errorMsg.show { opacity: 1; }
+/* TOASTS */
+#saveStatus{position:fixed;bottom:150px;left:50%;transform:translateX(-50%);z-index:500;background:rgba(5,13,26,.94);border:1px solid var(--foam);border-radius:24px;padding:10px 22px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--foam);opacity:0;pointer-events:none;transition:opacity .3s;white-space:nowrap}
+#saveStatus.show{opacity:1}
+#errorMsg{position:fixed;bottom:100px;left:24px;right:24px;z-index:500;background:rgba(232,101,74,.95);border-radius:12px;padding:14px 18px;font-size:13px;line-height:1.5;color:#fff;text-align:center;opacity:0;pointer-events:none;transition:opacity .3s}
+#errorMsg.show{opacity:1}
 </style>
 </head>
 <body>
-
-<!-- Animated background -->
 <div id="bg"></div>
-
-<!-- Flash effect -->
 <div id="flash"></div>
+<div id="saveStatus"></div>
+<div id="errorMsg"></div>
+<!-- Guide canvas sits above video, below UI -->
+<canvas id="guideCvs" style="position:fixed;inset:0;z-index:15;pointer-events:none"></canvas>
 
-<!-- Save Status -->
-<div id="saveStatus">📥 SAVED TO PHOTOS!</div>
-
-<!-- Error message -->
-<div id="errorMsg" id="errorMsg"></div>
-
-<!-- ═══ TITLE SCREEN ═══ -->
+<!-- TITLE -->
 <div class="screen" id="titleScreen">
   <div class="logo-wrap">
-    <span class="logo-fish">🐟</span>
-    <div class="logo-title">FISH & GRIP</div>
-    <div class="logo-sub">Show off your catch</div>
+    <span class="logo-fish">🎣</span>
+    <div class="logo-title">FISH &amp; GRIP</div>
+    <div class="logo-sub">World's Premier Fishing Selfie App</div>
   </div>
-
-  <div class="card" style="max-width:360px">
-    <div class="card-title">📷 Camera Permission</div>
-    <div class="card-body">
-      This app uses your <strong style="color:var(--foam)">front camera</strong> to take a selfie, then overlays a fish right in your hand. Tap below to grant access and start snapping!
+  <div class="mode-grid">
+    <div class="mode-card" id="modeFishBtn">
+      <div class="mode-icon">🐟</div>
+      <div class="mode-label">FISH PIC</div>
+      <div class="mode-desc">Hold up your catch &amp; show it off</div>
     </div>
-    <button class="btn btn-primary" id="startBtn">
-      <span class="btn-icon">🎣</span>
-      OPEN CAMERA
-    </button>
-    <p class="permission-note">
-      Camera permission required · Photos saved locally to your device<br>
-      Works on iPhone Safari with HTTPS (GitHub Pages)
-    </p>
+    <div class="mode-card" id="modeLicBtn">
+      <div class="mode-icon">🪪</div>
+      <div class="mode-label">LICENSE</div>
+      <div class="mode-desc">Get your official fishing license photo</div>
+    </div>
   </div>
-
   <div class="waterline"></div>
-
-  <div style="font-size:11px;color:rgba(232,244,248,0.3);letter-spacing:2px;text-transform:uppercase;text-align:center">
-    No data sent anywhere · 100% on-device
-  </div>
+  <p class="perm-note">Camera permission required · HTTPS needed<br>All photos stay on your device · Nothing uploaded</p>
 </div>
 
-<!-- ═══ CAMERA SCREEN ═══ -->
+<!-- CAMERA -->
 <div class="screen hidden" id="cameraScreen">
   <video id="videoEl" autoplay playsinline muted></video>
   <div class="cam-overlay">
-    <div class="cam-hint">Hold your hand out — the fish will go right in it! 🤙</div>
+    <div class="cam-hint" id="camHint">Position your hand in the circle!</div>
     <div class="cam-controls">
-      <div class="btn-round" id="cancelBtn" title="Cancel">✕</div>
-      <div class="btn-shutter" id="shutterBtn">
-        <div class="btn-shutter-inner"></div>
-      </div>
-      <div class="btn-round" id="flipBtn" title="Flip camera">🔄</div>
+      <div class="btn-round" id="cancelBtn">✕</div>
+      <div class="btn-shutter" id="shutterBtn"><div class="btn-shutter-inner"></div></div>
+      <div class="btn-round" id="flipBtn">🔄</div>
     </div>
   </div>
 </div>
 
-<!-- ═══ RESULT SCREEN ═══ -->
+<!-- RESULT -->
 <div class="screen hidden" id="resultScreen">
   <canvas id="resultCanvas"></canvas>
   <div class="result-overlay">
-
-    <div class="fish-picker-label">CHOOSE YOUR FISH</div>
-    <div class="fish-picker" id="fishPicker">
-      <div class="fish-opt selected" data-fish="🐟">🐟</div>
-      <div class="fish-opt" data-fish="🐠">🐠</div>
-      <div class="fish-opt" data-fish="🐡">🐡</div>
-      <div class="fish-opt" data-fish="🦈">🦈</div>
-      <div class="fish-opt" data-fish="🐙">🐙</div>
-      <div class="fish-opt" data-fish="🦑">🦑</div>
-      <div class="fish-opt" data-fish="🦞">🦞</div>
-      <div class="fish-opt" data-fish="🦐">🦐</div>
+    <div id="fishControls">
+      <div class="section-lbl">CHOOSE YOUR FISH</div>
+      <div class="fish-picker" id="fishPicker">
+        <div class="fish-opt selected" data-fish="🐟">🐟</div>
+        <div class="fish-opt" data-fish="🐠">🐠</div>
+        <div class="fish-opt" data-fish="🐡">🐡</div>
+        <div class="fish-opt" data-fish="🦈">🦈</div>
+        <div class="fish-opt" data-fish="🐬">🐬</div>
+        <div class="fish-opt" data-fish="🐙">🐙</div>
+        <div class="fish-opt" data-fish="🦞">🦞</div>
+        <div class="fish-opt" data-fish="🦐">🦐</div>
+      </div>
+      <div class="size-row">
+        <span class="size-lbl">FISH SIZE</span>
+        <input type="range" id="sizeSlider" min="50" max="170" value="100">
+      </div>
     </div>
-
-    <div class="size-row">
-      <span class="size-lbl">FISH SIZE</span>
-      <input type="range" id="sizeSlider" min="40" max="160" value="90">
+    <div id="licControls" style="display:none">
+      <div class="section-lbl" style="color:var(--sun)">🪪 YOUR OFFICIAL FISHING LICENSE</div>
+      <div style="font-size:11px;color:rgba(232,244,248,.5);text-align:center">Adjust hat with slider below</div>
+      <div class="size-row" style="margin-top:6px">
+        <span class="size-lbl">HAT SIZE</span>
+        <input type="range" id="hatSlider" min="50" max="130" value="80">
+      </div>
     </div>
-
     <div class="result-btns">
       <button class="btn-retake" id="retakeBtn">↩ RETAKE</button>
-      <button class="btn btn-save btn-primary" id="saveBtn">
-        <span>📥</span> SAVE PHOTO
-      </button>
+      <button class="btn btn-save" id="saveBtn">📥 SAVE PHOTO</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ═══════════════════════════════════════════
-   BUBBLES
-═══════════════════════════════════════════ */
+/* BUBBLES */
 (function(){
   const bg=document.getElementById('bg');
   for(let i=0;i<18;i++){
-    const b=document.createElement('div');
-    b.className='bubble';
-    const size=8+Math.random()*30;
-    b.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;bottom:-50px;animation-duration:${8+Math.random()*14}s;animation-delay:${-Math.random()*16}s;`;
+    const b=document.createElement('div');b.className='bubble';
+    const s=8+Math.random()*30;
+    b.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;bottom:-50px;animation-duration:${8+Math.random()*14}s;animation-delay:${-Math.random()*16}s;`;
     bg.appendChild(b);
   }
 })();
 
-/* ═══════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════ */
-let stream = null;
-let facingMode = 'user';
-let capturedImageData = null;
-let selectedFish = '🐟';
-let fishSize = 90;
+/* STATE */
+let stream=null, facingMode='user', appMode='fish';
+let capturedImageData=null, selectedFish='🐟', fishSize=100, hatSize=80;
+let capturedFishStats=null, currentLicData=null;
 
-/* ═══════════════════════════════════════════
-   SCREEN NAV
-═══════════════════════════════════════════ */
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+/* FISH STATS */
+const FISH_NAMES={'🐟':'Largemouth Bass','🐠':'Tropical Clownfish','🐡':'Pufferfish','🦈':'Bull Shark','🐬':'Bottlenose Dolphin','🐙':'Giant Octopus','🦞':'Maine Lobster','🦐':'Tiger Shrimp'};
+function randomFishStats(emoji){
+  const name=FISH_NAMES[emoji]||'Mystery Fish';
+  const lbInt=Math.floor(Math.random()*18)+1, lbDec=Math.floor(Math.random()*16);
+  const weight=`${lbInt}.${lbDec} lbs`;
+  const inches=Math.floor(Math.random()*28)+8;
+  const ft=Math.floor(inches/12), inRem=inches%12;
+  const length=ft>0?`${ft}' ${inRem}"`:`${inRem}"`;
+  return{name,weight,length};
+}
+
+/* LICENSE DATA */
+const FUNNY_NAMES=['Bubba McFishface','Capt. No-Limit','Earl T. Wormbreath','Dale "Two Hooks" Johnson','Cletus Bassmaster','Randy Catchmore','Peggy Reelgood','Wayne "The Wader" Willis','Jimbo Lakemaster'];
+const FUNNY_ISSUER=['Dept. of Fish & Dubious Wildlife','Bureau of Aquatic Shenanigans','Intl. Council of Bass Botherers','Lake Wobegon Regulatory Commission','Confederacy of Worm Dunkers'];
+const FUNNY_RESTRICTIONS=['NO catfish on Tuesdays','Must yell "GOT ONE!" each catch','Catch limit: ∞ but must name each fish','No fishing during scheduled naps','Must perform victory dance after each catch'];
+const FUNNY_VIOLATIONS=['Excessive bragging (3x)','Fish too small — released with apology','Fell in lake (2x)','None (very suspicious)','Argued with a duck'];
+function genLicData(){
+  const now=new Date();
+  const m=String(now.getMonth()+1).padStart(2,'0'), d=String(now.getDate()).padStart(2,'0'), y=now.getFullYear();
+  return{
+    name:FUNNY_NAMES[Math.floor(Math.random()*FUNNY_NAMES.length)],
+    issuer:FUNNY_ISSUER[Math.floor(Math.random()*FUNNY_ISSUER.length)],
+    restriction:FUNNY_RESTRICTIONS[Math.floor(Math.random()*FUNNY_RESTRICTIONS.length)],
+    violation:FUNNY_VIOLATIONS[Math.floor(Math.random()*FUNNY_VIOLATIONS.length)],
+    licNum:'FL-'+Math.floor(Math.random()*900000+100000)+'-'+String.fromCharCode(65+Math.floor(Math.random()*26)),
+    issued:`${m}/${d}/${y}`, expires:`${m}/${d}/${y+1}`,
+  };
+}
+
+/* SCREEN NAV */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
+  if(id!=='cameraScreen') stopGuide();
+}
+function showError(msg){const e=document.getElementById('errorMsg');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),4500);}
+function showToast(msg){const e=document.getElementById('saveStatus');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),3000);}
+
+/* GUIDE OVERLAY */
+const guideCvs=document.getElementById('guideCvs');
+const guideCtx=guideCvs.getContext('2d');
+let guideRAF=null;
+
+function stopGuide(){
+  if(guideRAF){cancelAnimationFrame(guideRAF);guideRAF=null;}
+  guideCvs.width=window.innerWidth;guideCvs.height=window.innerHeight;
+  guideCtx.clearRect(0,0,guideCvs.width,guideCvs.height);
 }
 
-/* ═══════════════════════════════════════════
-   ERROR / STATUS
-═══════════════════════════════════════════ */
-function showError(msg) {
-  const el = document.getElementById('errorMsg');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 4000);
-}
+function drawGuide(){
+  const W=window.innerWidth,H=window.innerHeight;
+  guideCvs.width=W;guideCvs.height=H;
+  guideCtx.clearRect(0,0,W,H);
+  const pulse=0.5+0.4*Math.abs(Math.sin(Date.now()/600));
 
-function showSaveStatus(msg) {
-  const el = document.getElementById('saveStatus');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2800);
-}
-
-/* ═══════════════════════════════════════════
-   CAMERA
-═══════════════════════════════════════════ */
-async function startCamera(facing) {
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-  }
-  const vid = document.getElementById('videoEl');
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: facing },
-        width:  { ideal: 1920 },
-        height: { ideal: 1080 }
-      },
-      audio: false
-    });
-    vid.srcObject = stream;
-    // Mirror only for front camera
-    vid.style.transform = facing === 'user' ? 'scaleX(-1)' : 'none';
-    await vid.play();
-    showScreen('cameraScreen');
-  } catch(err) {
-    const msg = err.name === 'NotAllowedError'
-      ? '⚠️ Camera permission denied. Please allow camera access in Safari Settings → Privacy → Camera, then reload.'
-      : err.name === 'NotFoundError'
-      ? '⚠️ No camera found on this device.'
-      : `⚠️ Camera error: ${err.message}`;
-    showError(msg);
-  }
-}
-
-/* ═══════════════════════════════════════════
-   CAPTURE
-═══════════════════════════════════════════ */
-function doCapture() {
-  const vid = document.getElementById('videoEl');
-  const cvs = document.getElementById('resultCanvas');
-
-  // Flash effect
-  const flash = document.getElementById('flash');
-  flash.style.opacity = '1';
-  setTimeout(() => { flash.style.opacity = '0'; }, 150);
-
-  // Vibrate if supported
-  if (navigator.vibrate) navigator.vibrate([30, 15, 60]);
-
-  // Draw video frame to canvas
-  const vw = vid.videoWidth || window.innerWidth;
-  const vh = vid.videoHeight || window.innerHeight;
-
-  // Output at screen resolution
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  cvs.width  = W * dpr;
-  cvs.height = H * dpr;
-  cvs.style.width  = W + 'px';
-  cvs.style.height = H + 'px';
-
-  const ctx = cvs.getContext('2d');
-  ctx.scale(dpr, dpr);
-
-  // Fill black first
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, W, H);
-
-  // Draw video frame — cover-fit + mirror if front cam
-  const scale = Math.max(W / vw, H / vh);
-  const dw = vw * scale;
-  const dh = vh * scale;
-  const dx = (W - dw) / 2;
-  const dy = (H - dh) / 2;
-
-  ctx.save();
-  if (facingMode === 'user') {
-    ctx.translate(W, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(vid, W - dx - dw, dy, dw, dh);
+  if(appMode==='fish'){
+    // Circle in upper-left — where hand should go
+    const cx=W*0.22, cy=H*0.27, r=W*0.17;
+    guideCtx.save();
+    guideCtx.strokeStyle=`rgba(100,212,242,${pulse})`;
+    guideCtx.lineWidth=3;
+    guideCtx.setLineDash([10,6]);
+    guideCtx.beginPath();guideCtx.arc(cx,cy,r,0,Math.PI*2);guideCtx.stroke();
+    guideCtx.setLineDash([]);
+    // inner subtle fill
+    guideCtx.fillStyle=`rgba(100,212,242,${pulse*0.08})`;
+    guideCtx.beginPath();guideCtx.arc(cx,cy,r,0,Math.PI*2);guideCtx.fill();
+    // label below
+    guideCtx.fillStyle=`rgba(100,212,242,${pulse})`;
+    guideCtx.font='bold 13px Cabin,sans-serif';
+    guideCtx.textAlign='center';guideCtx.textBaseline='top';
+    guideCtx.fillText('✋ PUT HAND HERE',cx,cy+r+8);
+    guideCtx.restore();
   } else {
-    ctx.drawImage(vid, dx, dy, dw, dh);
+    // Hat ghost guide — top center
+    const cx=W*0.5, hatW=W*0.55, cy=H*0.08;
+    drawHatGuide(guideCtx,cx,cy,hatW,pulse);
+    guideCtx.save();
+    guideCtx.fillStyle=`rgba(247,201,72,${pulse})`;
+    guideCtx.font='bold 13px Cabin,sans-serif';
+    guideCtx.textAlign='center';guideCtx.textBaseline='top';
+    guideCtx.fillText('🎩 ALIGN TOP OF HEAD HERE',cx,cy+hatW*0.68+10);
+    guideCtx.restore();
   }
+
+  guideRAF=requestAnimationFrame(drawGuide);
+}
+
+function drawHatGuide(ctx,cx,cy,hatW,alpha){
+  const crownW=hatW*0.68, crownH=hatW*0.52, brimW=hatW, brimH=hatW*0.17;
+  const brimY=cy+crownH*0.48;
+  ctx.save();
+  ctx.globalAlpha=alpha*0.55;
+  ctx.strokeStyle='rgba(247,201,72,1)';
+  ctx.lineWidth=2.5;
+  ctx.setLineDash([8,5]);
+  // crown outline
+  ctx.beginPath();
+  ctx.moveTo(cx-crownW*0.5,brimY);
+  ctx.quadraticCurveTo(cx-crownW*0.54,cy-crownH*0.42,cx-crownW*0.28,cy-crownH*0.82);
+  ctx.quadraticCurveTo(cx,cy-crownH*0.98,cx+crownW*0.28,cy-crownH*0.82);
+  ctx.quadraticCurveTo(cx+crownW*0.54,cy-crownH*0.42,cx+crownW*0.5,brimY);
+  ctx.stroke();
+  // brim ellipse
+  ctx.beginPath();ctx.ellipse(cx,brimY,brimW*0.5,brimH*0.5,0,0,Math.PI*2);ctx.stroke();
+  ctx.setLineDash([]);
   ctx.restore();
+}
 
-  // Store this so we can redraw when fish changes
-  capturedImageData = ctx.getImageData(0, 0, W * dpr, H * dpr);
+/* CAMERA */
+async function startCamera(facing){
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  const vid=document.getElementById('videoEl');
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:1080}},audio:false});
+    vid.srcObject=stream;
+    vid.style.transform=facing==='user'?'scaleX(-1)':'none';
+    await vid.play();
+    document.getElementById('camHint').textContent=
+      appMode==='fish'?'✋ Place your hand in the circle, then snap!':'🎩 Align the top of your head with the hat outline!';
+    showScreen('cameraScreen');
+    drawGuide();
+  }catch(err){
+    const msg=err.name==='NotAllowedError'?'⚠️ Camera denied. Allow in Safari Settings → Privacy → Camera, then reload.':
+              err.name==='NotFoundError'?'⚠️ No camera found.':
+              '⚠️ Camera error: '+err.message;
+    showError(msg);showScreen('titleScreen');
+  }
+}
 
-  // Stop camera
-  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+/* CAPTURE */
+function doCapture(){
+  const vid=document.getElementById('videoEl');
+  const cvs=document.getElementById('resultCanvas');
+  const fl=document.getElementById('flash');
+  fl.style.opacity='1';setTimeout(()=>{fl.style.opacity='0';},150);
+  if(navigator.vibrate)navigator.vibrate([30,15,60]);
 
-  // Draw fish overlay
-  drawFishOverlay(cvs, ctx, W, H);
+  const W=window.innerWidth,H=window.innerHeight;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cvs.width=W*dpr;cvs.height=H*dpr;
+  cvs.style.width=W+'px';cvs.style.height=H+'px';
+  const ctx=cvs.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
 
+  const vw=vid.videoWidth||W,vh=vid.videoHeight||H;
+  const sc=Math.max(W/vw,H/vh);
+  const dw=vw*sc,dh=vh*sc,dx=(W-dw)/2,dy=(H-dh)/2;
+  ctx.save();
+  if(facingMode==='user'){ctx.translate(W,0);ctx.scale(-1,1);ctx.drawImage(vid,W-dx-dw,dy,dw,dh);}
+  else{ctx.drawImage(vid,dx,dy,dw,dh);}
+  ctx.restore();
+  capturedImageData=ctx.getImageData(0,0,W*dpr,H*dpr);
+
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  stopGuide();
+
+  if(appMode==='fish'){
+    capturedFishStats=randomFishStats(selectedFish);
+    document.getElementById('fishControls').style.display='block';
+    document.getElementById('licControls').style.display='none';
+    drawFishOverlay(cvs,ctx,W,H);
+  } else {
+    currentLicData=genLicData();
+    document.getElementById('fishControls').style.display='none';
+    document.getElementById('licControls').style.display='block';
+    drawLicenseOverlay(cvs,ctx,W,H);
+  }
   showScreen('resultScreen');
 }
 
-/* ═══════════════════════════════════════════
-   FISH OVERLAY
-═══════════════════════════════════════════ */
-function drawFishOverlay(cvs, ctx, W, H) {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+/* REDRAW */
+function redrawResult(){
+  const cvs=document.getElementById('resultCanvas');
+  const ctx=cvs.getContext('2d');
+  const W=window.innerWidth,H=window.innerHeight;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  if(appMode==='fish')drawFishOverlay(cvs,ctx,W,H);
+  else drawLicenseOverlay(cvs,ctx,W,H);
+}
 
-  // Restore photo
-  if (capturedImageData) {
-    ctx.putImageData(capturedImageData, 0, 0);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // restore scale after putImageData resets it
-  }
+/* ── BUCKET HAT (canvas-drawn, khaki + navy/red band) ── */
+function drawBucketHat(ctx,cx,cy,hatW){
+  const crownW=hatW*0.68, crownH=hatW*0.54;
+  const brimW=hatW, brimH=hatW*0.17;
+  const brimY=cy+crownH*0.46;
 
-  // Fish position: roughly lower-center where a hand would be
-  const fishX = W * 0.52;
-  const fishY = H * 0.58;
-  const sz = fishSize;
-
-  // Subtle shadow glow beneath fish
+  // Drop shadow
   ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.65)';
-  ctx.shadowBlur = 18;
-  ctx.shadowOffsetY = 8;
-  ctx.font = `${sz}px serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
+  ctx.shadowColor='rgba(0,0,0,0.65)';ctx.shadowBlur=24;ctx.shadowOffsetY=10;
 
-  // Slight tilt for realism
-  ctx.translate(fishX, fishY);
-  ctx.rotate(-0.18); // ~10 degrees
-  ctx.fillText(selectedFish, 0, 0);
+  // Brim underside (darker khaki)
+  ctx.beginPath();
+  ctx.ellipse(cx,brimY+brimH*0.2,brimW*0.5,brimH*0.52,0,0,Math.PI*2);
+  ctx.fillStyle='#7a7360';ctx.fill();
+
+  // Crown body
+  ctx.beginPath();
+  ctx.moveTo(cx-crownW*0.5,brimY-brimH*0.1);
+  ctx.quadraticCurveTo(cx-crownW*0.54,cy-crownH*0.38,cx-crownW*0.28,cy-crownH*0.8);
+  ctx.quadraticCurveTo(cx,cy-crownH,cx+crownW*0.28,cy-crownH*0.8);
+  ctx.quadraticCurveTo(cx+crownW*0.54,cy-crownH*0.38,cx+crownW*0.5,brimY-brimH*0.1);
+  const cg=ctx.createLinearGradient(cx-crownW*0.5,cy-crownH,cx+crownW*0.5,brimY);
+  cg.addColorStop(0,'#bdb39a');cg.addColorStop(0.4,'#ada38a');cg.addColorStop(1,'#9a9078');
+  ctx.fillStyle=cg;
+  ctx.closePath();ctx.fill();
+
+  // Crown top cap
+  ctx.beginPath();ctx.ellipse(cx,cy-crownH*0.8,crownW*0.28,crownH*0.2,0,0,Math.PI*2);
+  ctx.fillStyle='#c4ba9e';ctx.fill();
+
+  // Brim top face
+  ctx.beginPath();ctx.ellipse(cx,brimY,brimW*0.5,brimH*0.5,0,0,Math.PI*2);
+  const bg2=ctx.createRadialGradient(cx,brimY,brimW*0.05,cx,brimY,brimW*0.5);
+  bg2.addColorStop(0,'#aaa090');bg2.addColorStop(0.6,'#a09680');bg2.addColorStop(1,'#90886c');
+  ctx.fillStyle=bg2;ctx.fill();
+
+  ctx.restore(); // end shadow
+
+  // Brim stitching
+  ctx.save();
+  ctx.strokeStyle='rgba(0,0,0,0.14)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.ellipse(cx,brimY,brimW*0.44,brimH*0.42,0,0,Math.PI*2);ctx.stroke();
   ctx.restore();
 
-  // DEEP HOOK watermark
-  ctx.font = '600 11px Cabin, sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'bottom';
-  ctx.fillText('🎣 FISH & GRIP', W - 14, H - 14);
+  // ── HATBAND: navy base + red center stripe ──
+  const bandY=brimY-brimH*0.25;
+  const bandRX=crownW*0.5, bandRY=crownH*0.14;
+
+  // Navy outer band
+  ctx.save();
+  ctx.beginPath();ctx.ellipse(cx,bandY,bandRX*1.01,bandRY*1.0,0,0,Math.PI*2);
+  ctx.fillStyle='#1a2a4a';ctx.fill();
+  // Navy bottom stripe
+  ctx.beginPath();ctx.ellipse(cx,bandY+bandRY*0.55,bandRX,bandRY*0.7,0,0,Math.PI*2);
+  ctx.fillStyle='#1a2a4a';ctx.fill();
+  // Red center stripe
+  ctx.beginPath();ctx.ellipse(cx,bandY+bandRY*0.18,bandRX*0.99,bandRY*0.52,0,0,Math.PI*2);
+  ctx.fillStyle='#a82020';ctx.fill();
+  // Highlight on band
+  ctx.beginPath();ctx.ellipse(cx,bandY-bandRY*0.1,bandRX*0.6,bandRY*0.18,0,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fill();
+  ctx.restore();
+
+  // Crown left shading
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(cx-crownW*0.5,brimY-brimH*0.1);
+  ctx.quadraticCurveTo(cx-crownW*0.54,cy-crownH*0.3,cx-crownW*0.28,cy-crownH*0.8);
+  ctx.quadraticCurveTo(cx-crownW*0.1,cy-crownH*0.9,cx,cy-crownH*0.96);
+  ctx.lineTo(cx,brimY-brimH*0.1);ctx.closePath();
+  ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fill();
+  ctx.restore();
+
+  // Stitching seams on crown
+  ctx.save();
+  ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  ctx.beginPath();ctx.moveTo(cx-crownW*0.48,brimY-brimH*0.08);ctx.quadraticCurveTo(cx-crownW*0.5,cy-crownH*0.18,cx-crownW*0.25,cy-crownH*0.72);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx+crownW*0.48,brimY-brimH*0.08);ctx.quadraticCurveTo(cx+crownW*0.5,cy-crownH*0.18,cx+crownW*0.25,cy-crownH*0.72);ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
+
+  // Eyelet rivet
+  ctx.save();
+  ctx.fillStyle='rgba(170,160,135,0.85)';
+  ctx.beginPath();ctx.arc(cx+crownW*0.3,cy-crownH*0.38,3,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.arc(cx+crownW*0.3,cy-crownH*0.38,3,0,Math.PI*2);ctx.stroke();
+  ctx.restore();
+
+  // Brim top shadow near crown
+  ctx.save();
+  ctx.beginPath();ctx.ellipse(cx,brimY,brimW*0.5,brimH*0.5,0,Math.PI,Math.PI*2);
+  ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fill();
+  ctx.restore();
 }
 
-function redrawResult() {
-  const cvs = document.getElementById('resultCanvas');
-  const ctx = cvs.getContext('2d');
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  drawFishOverlay(cvs, ctx, W, H);
+/* ── ROUNDED RECT helper ── */
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
 }
 
-/* ═══════════════════════════════════════════
-   SAVE PHOTO
-═══════════════════════════════════════════ */
-function savePhoto() {
-  const cvs = document.getElementById('resultCanvas');
+/* ── FISH OVERLAY ── */
+function drawFishOverlay(cvs,ctx,W,H){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  if(capturedImageData){ctx.putImageData(capturedImageData,0,0);ctx.setTransform(dpr,0,0,dpr,0,0);}
 
-  try {
-    const dataUrl = cvs.toDataURL('image/jpeg', 0.92);
+  const stats=capturedFishStats||randomFishStats(selectedFish);
+  const cx=W*0.22, cy=H*0.27, r=W*0.17;
 
-    // iOS: open image in new tab — user can long-press to save
-    // Best practice for WKWebView / Safari (no direct Photos API in web)
-    const win = window.open();
-    if (win) {
-      win.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta name="viewport" content="width=device-width,initial-scale=1">
-          <style>
-            body { margin:0; background:#000; display:flex; flex-direction:column;
-                   align-items:center; justify-content:center; min-height:100vh; gap:16px; }
-            img { max-width:100%; max-height:80vh; border-radius:8px; }
-            p { color:#fff; font-family:sans-serif; font-size:15px; text-align:center;
-                padding:0 20px; opacity:0.8; }
-          </style>
-        </head>
-        <body>
-          <img src="${dataUrl}" alt="Fish & Grip Photo">
-          <p>📥 Press and hold the image, then tap <strong>Save to Photos</strong></p>
-        </body>
-        </html>
-      `);
+  // Circle backing
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.55)';ctx.shadowBlur=20;
+  ctx.beginPath();ctx.arc(cx,cy,r+5,0,Math.PI*2);
+  ctx.fillStyle='rgba(5,18,38,0.6)';ctx.fill();
+  ctx.restore();
+
+  // Circle border glow
+  ctx.save();
+  ctx.strokeStyle='rgba(100,212,242,0.85)';ctx.lineWidth=3;
+  ctx.shadowColor='rgba(100,212,242,0.4)';ctx.shadowBlur=10;
+  ctx.beginPath();ctx.arc(cx,cy,r+5,0,Math.PI*2);ctx.stroke();
+  ctx.restore();
+
+  // Fish emoji in circle
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.7)';ctx.shadowBlur=14;
+  ctx.font=`${fishSize}px serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.translate(cx,cy);ctx.rotate(-0.15);
+  ctx.fillText(selectedFish,0,0);
+  ctx.restore();
+
+  // Stats card upper-right
+  const cardX=W*0.42,cardY=H*0.11,cardW=W*0.54,cardH=H*0.24;
+  // Card bg
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=16;
+  ctx.fillStyle='rgba(5,20,40,0.82)';
+  roundRect(ctx,cardX,cardY,cardW,cardH,12);ctx.fill();
+  ctx.restore();
+  // Card border
+  ctx.save();
+  ctx.strokeStyle='rgba(100,212,242,0.5)';ctx.lineWidth=1.5;
+  roundRect(ctx,cardX,cardY,cardW,cardH,12);ctx.stroke();
+  ctx.restore();
+  // Header
+  ctx.save();
+  ctx.fillStyle='rgba(100,212,242,0.12)';
+  ctx.beginPath();
+  ctx.moveTo(cardX+12,cardY);ctx.lineTo(cardX+cardW-12,cardY);
+  ctx.arcTo(cardX+cardW,cardY,cardX+cardW,cardY+12,12);
+  ctx.lineTo(cardX+cardW,cardY+cardH*0.36);ctx.lineTo(cardX,cardY+cardH*0.36);
+  ctx.lineTo(cardX,cardY+12);ctx.arcTo(cardX,cardY,cardX+12,cardY,12);
+  ctx.closePath();ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  ctx.fillStyle='#64d4f2';
+  ctx.font=`bold ${Math.round(cardW*0.1)}px Bebas Neue,sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('OFFICIAL CATCH REPORT',cardX+cardW/2,cardY+cardH*0.17);
+
+  ctx.strokeStyle='rgba(100,212,242,0.3)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cardX+12,cardY+cardH*0.36);ctx.lineTo(cardX+cardW-12,cardY+cardH*0.36);ctx.stroke();
+
+  const rows=[{lbl:'SPECIES',val:stats.name},{lbl:'WEIGHT',val:stats.weight},{lbl:'LENGTH',val:stats.length}];
+  const rowH=(cardH*0.62)/3;
+  rows.forEach((row,i)=>{
+    const ry=cardY+cardH*0.36+rowH*i+rowH*0.5;
+    ctx.fillStyle='rgba(232,244,248,0.45)';
+    ctx.font=`${Math.round(cardW*0.08)}px Bebas Neue,sans-serif`;
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(row.lbl+':',cardX+12,ry);
+    ctx.fillStyle='#fff';
+    ctx.font=`bold ${Math.round(cardW*0.09)}px Cabin,sans-serif`;
+    ctx.textAlign='right';
+    ctx.fillText(row.val,cardX+cardW-12,ry);
+  });
+  ctx.restore();
+
+  // Watermark
+  ctx.font='600 11px Cabin,sans-serif';
+  ctx.fillStyle='rgba(255,255,255,0.28)';
+  ctx.textAlign='right';ctx.textBaseline='bottom';
+  ctx.fillText('🎣 FISH & GRIP',W-14,H-14);
+}
+
+/* ── LICENSE OVERLAY ── */
+function drawLicenseOverlay(cvs,ctx,W,H){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  if(capturedImageData){ctx.putImageData(capturedImageData,0,0);ctx.setTransform(dpr,0,0,dpr,0,0);}
+
+  // Hat on head — top of screen center
+  const hatW=W*(hatSize/100)*0.9;
+  ctx.save();
+  drawBucketHat(ctx,W*0.5,H*0.09,hatW);
+  ctx.restore();
+
+  // License card bottom 40%
+  const lic=currentLicData;
+  const padX=16, cardY=H*0.58, cardH=H*0.39, cardW=W-padX*2;
+
+  // Aged paper background
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.7)';ctx.shadowBlur=22;
+  const pg=ctx.createLinearGradient(padX,cardY,padX+cardW,cardY+cardH);
+  pg.addColorStop(0,'#f5ead0');pg.addColorStop(0.5,'#ede0bc');pg.addColorStop(1,'#e8d8a8');
+  ctx.fillStyle=pg;
+  roundRect(ctx,padX,cardY,cardW,cardH,10);ctx.fill();
+  ctx.restore();
+
+  // Double border
+  ctx.save();
+  ctx.strokeStyle='#8b4513';ctx.lineWidth=3;
+  roundRect(ctx,padX+3,cardY+3,cardW-6,cardH-6,8);ctx.stroke();
+  ctx.strokeStyle='rgba(139,69,19,0.35)';ctx.lineWidth=1;
+  roundRect(ctx,padX+7,cardY+7,cardW-14,cardH-14,6);ctx.stroke();
+  ctx.restore();
+
+  // Header bar navy
+  ctx.save();
+  ctx.fillStyle='#1a3a5a';
+  ctx.beginPath();
+  ctx.moveTo(padX+3+8,cardY+3);ctx.lineTo(padX+3+cardW-6-8,cardY+3);
+  ctx.arcTo(padX+3+cardW-6,cardY+3,padX+3+cardW-6,cardY+3+8,8);
+  ctx.lineTo(padX+3+cardW-6,cardY+3+cardH*0.22);
+  ctx.lineTo(padX+3,cardY+3+cardH*0.22);
+  ctx.lineTo(padX+3,cardY+3+8);
+  ctx.arcTo(padX+3,cardY+3,padX+3+8,cardY+3,8);
+  ctx.closePath();ctx.fill();
+  // Stars
+  ctx.fillStyle='rgba(247,201,72,0.55)';ctx.font='10px serif';ctx.textBaseline='middle';
+  for(let i=0;i<6;i++){const sx=padX+20+(i*(cardW-40)/5);ctx.fillText('★',sx,cardY+3+cardH*0.11);}
+  // Title
+  ctx.fillStyle='#f7c948';
+  ctx.font=`bold ${Math.round(cardW*0.062)}px Bebas Neue,sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('OFFICIAL FISHING LICENSE',padX+cardW/2,cardY+cardH*0.11);
+  ctx.fillStyle='rgba(247,201,72,0.55)';
+  ctx.font=`${Math.round(cardW*0.036)}px Cabin,sans-serif`;
+  ctx.fillText('STATE OF CONFUSION · DEPT. OF FISH & DUBIOUS WILDLIFE',padX+cardW/2,cardY+cardH*0.195);
+  ctx.restore();
+
+  // Fields
+  ctx.save();
+  const fnt=Math.round(cardW*0.044), fntSm=Math.round(cardW*0.034);
+  const lPad=padX+14, top=cardY+cardH*0.26;
+  const half=(cardW-28)/2;
+
+  function field(lbl,val,fx,fy,fw){
+    ctx.fillStyle='#5a3a10';ctx.font=`${fntSm}px Bebas Neue,sans-serif`;
+    ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(lbl,fx,fy);
+    ctx.strokeStyle='rgba(90,58,16,0.28)';ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.moveTo(fx,fy+fntSm+9);ctx.lineTo(fx+fw,fy+fntSm+9);ctx.stroke();
+    ctx.fillStyle='#1a0a00';ctx.font=`${fnt}px Cabin,sans-serif`;
+    ctx.fillText(val,fx,fy+fntSm+2);
+  }
+
+  field('LICENSE HOLDER:',lic.name,lPad,top,cardW-28);
+  field('LICENSE NO:',lic.licNum,lPad,top+cardH*0.16,half-8);
+  field('EXPIRES:',lic.expires,lPad+half+8,top+cardH*0.16,half-8);
+  field('TYPE:','FRESH/SALT/SWAMPWATER',lPad,top+cardH*0.31,cardW-28);
+  field('RESTRICTION:',lic.restriction,lPad,top+cardH*0.46,cardW-28);
+
+  // Prior violations small print
+  ctx.fillStyle='rgba(90,58,16,0.5)';
+  ctx.font=`italic ${Math.round(cardW*0.029)}px Cabin,sans-serif`;
+  ctx.textAlign='left';ctx.textBaseline='bottom';
+  ctx.fillText('PRIOR VIOLATIONS: '+lic.violation,lPad,cardY+cardH-28);
+
+  // Issuer bottom center
+  ctx.fillStyle='rgba(90,58,16,0.45)';
+  ctx.font=`italic ${Math.round(cardW*0.031)}px Cabin,sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='bottom';
+  ctx.fillText(lic.issuer,padX+cardW/2,cardY+cardH-10);
+
+  // Rubber stamp circle
+  drawStamp(ctx,padX+cardW-62,cardY+cardH-55,42);
+  ctx.restore();
+
+  // Watermark
+  ctx.font='600 11px Cabin,sans-serif';
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  ctx.textAlign='right';ctx.textBaseline='bottom';
+  ctx.fillText('🎣 FISH & GRIP',W-14,H-14);
+}
+
+function drawStamp(ctx,cx,cy,r){
+  ctx.save();ctx.globalAlpha=0.6;
+  ctx.strokeStyle='#c0392b';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,r-4,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='#c0392b';
+  ctx.font=`bold ${Math.round(r*0.38)}px Bebas Neue,sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('VALID',cx,cy-r*0.16);
+  ctx.font=`${Math.round(r*0.28)}px Bebas Neue,sans-serif`;
+  ctx.fillText(new Date().getFullYear(),cx,cy+r*0.28);
+  ctx.restore();
+}
+
+/* SAVE & RESET */
+function savePhoto(){
+  const cvs=document.getElementById('resultCanvas');
+  try{
+    const dataUrl=cvs.toDataURL('image/jpeg',0.93);
+    const win=window.open();
+    if(win){
+      win.document.write(`<!DOCTYPE html><html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:14px}
+img{max-width:100%;max-height:82vh;border-radius:6px}
+p{color:#fff;font-family:sans-serif;font-size:15px;text-align:center;padding:0 20px;opacity:.8}
+strong{color:#64d4f2}</style></head><body>
+<img src="${dataUrl}">
+<p>Press &amp; hold the photo → tap <strong>Add to Photos</strong> to save 📥</p>
+</body></html>`);
       win.document.close();
-      showSaveStatus('📸 TAP & HOLD IN NEW TAB TO SAVE!');
+      showToast('📸 TAP & HOLD → SAVE TO PHOTOS');
     } else {
-      // Fallback: download link
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = 'FishAndGrip_' + Date.now() + '.jpg';
-      a.click();
-      showSaveStatus('📥 DOWNLOADING...');
+      const a=document.createElement('a');a.href=dataUrl;a.download='FishAndGrip_'+Date.now()+'.jpg';a.click();
+      showToast('📥 DOWNLOADING...');
     }
-  } catch(e) {
-    showError('⚠️ Could not save: ' + e.message);
-  }
+    setTimeout(resetApp,3200);
+  }catch(e){showError('⚠️ Save failed: '+e.message);}
 }
 
-/* ═══════════════════════════════════════════
-   EVENT WIRING
-   All camera calls are synchronous from
-   touchend/click so iOS Safari allows them.
-═══════════════════════════════════════════ */
-
-// ── TITLE ──
-const startBtn = document.getElementById('startBtn');
-startBtn.addEventListener('touchend', function(e) {
-  e.preventDefault(); e.stopPropagation();
-  facingMode = 'user';
-  startCamera(facingMode);
-}, { passive: false });
-startBtn.addEventListener('click', function() {
-  facingMode = 'user';
-  startCamera(facingMode);
-});
-
-// ── SHUTTER ──
-const shutterBtn = document.getElementById('shutterBtn');
-shutterBtn.addEventListener('touchend', function(e) {
-  e.preventDefault(); e.stopPropagation();
-  doCapture();
-}, { passive: false });
-shutterBtn.addEventListener('click', doCapture);
-
-// ── FLIP ──
-const flipBtn = document.getElementById('flipBtn');
-flipBtn.addEventListener('touchend', function(e) {
-  e.preventDefault(); e.stopPropagation();
-  facingMode = facingMode === 'user' ? 'environment' : 'user';
-  startCamera(facingMode);
-}, { passive: false });
-flipBtn.addEventListener('click', function() {
-  facingMode = facingMode === 'user' ? 'environment' : 'user';
-  startCamera(facingMode);
-});
-
-// ── CANCEL ──
-const cancelBtn = document.getElementById('cancelBtn');
-cancelBtn.addEventListener('touchend', function(e) {
-  e.preventDefault();
-  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+function resetApp(){
+  capturedImageData=null;capturedFishStats=null;currentLicData=null;
+  selectedFish='🐟';fishSize=100;hatSize=80;
+  document.querySelectorAll('.fish-opt').forEach(o=>o.classList.remove('selected'));
+  const first=document.querySelector('.fish-opt[data-fish="🐟"]');
+  if(first)first.classList.add('selected');
+  document.getElementById('sizeSlider').value=100;
+  document.getElementById('hatSlider').value=80;
+  stopGuide();
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   showScreen('titleScreen');
-}, { passive: false });
-cancelBtn.addEventListener('click', function() {
-  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-  showScreen('titleScreen');
-});
+}
 
-// ── RETAKE ──
-const retakeBtn = document.getElementById('retakeBtn');
-retakeBtn.addEventListener('touchend', function(e) {
+/* EVENT WIRING */
+// Mode select
+const modeFishBtn=document.getElementById('modeFishBtn');
+function openFish(){appMode='fish';facingMode='user';startCamera(facingMode);}
+modeFishBtn.addEventListener('touchend',e=>{e.preventDefault();openFish();},{passive:false});
+modeFishBtn.addEventListener('click',openFish);
+
+const modeLicBtn=document.getElementById('modeLicBtn');
+function openLic(){appMode='license';facingMode='user';startCamera(facingMode);}
+modeLicBtn.addEventListener('touchend',e=>{e.preventDefault();openLic();},{passive:false});
+modeLicBtn.addEventListener('click',openLic);
+
+// Camera controls
+const shutterBtn=document.getElementById('shutterBtn');
+shutterBtn.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();doCapture();},{passive:false});
+shutterBtn.addEventListener('click',doCapture);
+
+const flipBtn=document.getElementById('flipBtn');
+flipBtn.addEventListener('touchend',e=>{e.preventDefault();facingMode=facingMode==='user'?'environment':'user';startCamera(facingMode);},{passive:false});
+flipBtn.addEventListener('click',()=>{facingMode=facingMode==='user'?'environment':'user';startCamera(facingMode);});
+
+const cancelBtn=document.getElementById('cancelBtn');
+cancelBtn.addEventListener('touchend',e=>{e.preventDefault();stopGuide();if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}showScreen('titleScreen');},{passive:false});
+cancelBtn.addEventListener('click',()=>{stopGuide();if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}showScreen('titleScreen');});
+
+// Result
+document.getElementById('saveBtn').addEventListener('touchend',e=>{e.preventDefault();savePhoto();},{passive:false});
+document.getElementById('saveBtn').addEventListener('click',savePhoto);
+
+document.getElementById('retakeBtn').addEventListener('touchend',e=>{e.preventDefault();capturedImageData=null;capturedFishStats=null;currentLicData=null;startCamera(facingMode);},{passive:false});
+document.getElementById('retakeBtn').addEventListener('click',()=>{capturedImageData=null;capturedFishStats=null;currentLicData=null;startCamera(facingMode);});
+
+// Fish picker
+function handlePick(e){
+  const opt=e.target.closest('.fish-opt');if(!opt)return;
   e.preventDefault();
-  capturedImageData = null;
-  facingMode = 'user';
-  startCamera(facingMode);
-}, { passive: false });
-retakeBtn.addEventListener('click', function() {
-  capturedImageData = null;
-  facingMode = 'user';
-  startCamera(facingMode);
-});
-
-// ── SAVE ──
-const saveBtn = document.getElementById('saveBtn');
-saveBtn.addEventListener('touchend', function(e) {
-  e.preventDefault();
-  savePhoto();
-}, { passive: false });
-saveBtn.addEventListener('click', savePhoto);
-
-// ── FISH PICKER ──
-document.getElementById('fishPicker').addEventListener('click', function(e) {
-  const opt = e.target.closest('.fish-opt');
-  if (!opt) return;
-  document.querySelectorAll('.fish-opt').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('.fish-opt').forEach(o=>o.classList.remove('selected'));
   opt.classList.add('selected');
-  selectedFish = opt.dataset.fish;
+  selectedFish=opt.dataset.fish;
+  capturedFishStats=randomFishStats(selectedFish);
   redrawResult();
-});
-document.getElementById('fishPicker').addEventListener('touchend', function(e) {
-  const opt = e.target.closest('.fish-opt');
-  if (!opt) return;
-  e.preventDefault();
-  document.querySelectorAll('.fish-opt').forEach(o => o.classList.remove('selected'));
-  opt.classList.add('selected');
-  selectedFish = opt.dataset.fish;
-  redrawResult();
-}, { passive: false });
+}
+document.getElementById('fishPicker').addEventListener('touchend',handlePick,{passive:false});
+document.getElementById('fishPicker').addEventListener('click',handlePick);
 
-// ── SIZE SLIDER ──
-document.getElementById('sizeSlider').addEventListener('input', function() {
-  fishSize = parseInt(this.value);
-  redrawResult();
-});
+// Size sliders
+document.getElementById('sizeSlider').addEventListener('input',function(){fishSize=parseInt(this.value);redrawResult();});
+document.getElementById('hatSlider').addEventListener('input',function(){hatSize=parseInt(this.value);redrawResult();});
 
-// Prevent scroll / pull-to-refresh
-document.addEventListener('touchmove', e => {
-  if (!e.target.closest('input[type=range]') && !e.target.closest('.fish-picker')) {
-    e.preventDefault();
-  }
-}, { passive: false });
-document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
+// Scroll lock
+document.addEventListener('touchmove',e=>{
+  if(!e.target.closest('input[type=range]'))e.preventDefault();
+},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});
 </script>
 </body>
 </html>
