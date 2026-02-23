@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Fish & Grip 🎣</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabin:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ocean: #0a1628;
+    --deep: #050d1a;
+    --wave: #0e4d6e;
+    --foam: #64d4f2;
+    --sun: #f7c948;
+    --hook: #e8654a;
+    --light: #e8f4f8;
+    --card: rgba(14,77,110,0.35);
+    --border: rgba(100,212,242,0.2);
+    --r: 14px;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--deep);
+    font-family: 'Cabin', sans-serif;
+    color: var(--light);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* ── BACKGROUND ── */
+  #bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 20% 0%, #0e4d6e 0%, #0a1628 50%, #050d1a 100%);
+    overflow: hidden;
+  }
+  #bg::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 80% 20%, rgba(100,212,242,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 10% 80%, rgba(247,201,72,0.05) 0%, transparent 40%);
+  }
+  .bubble {
+    position: absolute; border-radius: 50%;
+    background: rgba(100,212,242,0.06);
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0% { transform: translateY(110vh) scale(0.4); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-20vh) scale(1); opacity: 0; }
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 28px 24px;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .screen.hidden {
+    opacity: 0; pointer-events: none;
+    transform: scale(0.97);
+  }
+
+  /* ── TITLE SCREEN ── */
+  #titleScreen { gap: 0; }
+
+  .logo-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 36px;
+  }
+  .logo-fish {
+    font-size: 88px;
+    filter: drop-shadow(0 0 28px rgba(100,212,242,0.5));
+    animation: fishbob 3s ease-in-out infinite;
+    display: block; line-height: 1;
+  }
+  @keyframes fishbob {
+    0%,100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-12px) rotate(3deg); }
+  }
+  .logo-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 62px; letter-spacing: 4px;
+    color: var(--foam);
+    text-shadow: 0 0 40px rgba(100,212,242,0.4), 0 4px 0 rgba(0,0,0,0.4);
+    line-height: 0.9; margin-top: 8px;
+  }
+  .logo-sub {
+    font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--sun); opacity: 0.9; margin-top: 6px;
+    font-weight: 700;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 20px;
+    width: 100%; max-width: 360px;
+  }
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 2px;
+    color: var(--foam); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-body {
+    font-size: 13px; line-height: 1.6;
+    color: rgba(232,244,248,0.7);
+    margin-bottom: 16px;
+  }
+
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 16px 20px;
+    border: none; border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 2px;
+    cursor: pointer; transition: all 0.18s ease;
+    position: relative; overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn::after {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.15s;
+  }
+  .btn:active::after { background: rgba(255,255,255,0.1); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #1ab8e8, #0e90c0);
+    color: #fff;
+    box-shadow: 0 4px 24px rgba(26,184,232,0.4), 0 2px 0 rgba(0,0,0,0.3);
+  }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .btn-icon { font-size: 26px; }
+
+  .permission-note {
+    text-align: center; font-size: 11px;
+    color: rgba(232,244,248,0.45);
+    margin-top: 12px; line-height: 1.5;
+    letter-spacing: 0.3px;
+  }
+
+  .waterline {
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--foam), transparent);
+    opacity: 0.3; margin: 20px 0;
+    max-width: 360px;
+  }
+
+  /* ── CAMERA SCREEN ── */
+  #cameraScreen { padding: 0; justify-content: flex-end; }
+
+  #videoEl {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1); /* mirror selfie */
+    background: #000;
+  }
+
+  .cam-overlay {
+    position: relative; z-index: 20;
+    width: 100%; padding: 20px 24px 40px;
+    background: linear-gradient(to top, rgba(5,13,26,0.95) 0%, rgba(5,13,26,0.5) 60%, transparent 100%);
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .cam-hint {
+    font-size: 13px; color: rgba(232,244,248,0.8);
+    text-align: center; letter-spacing: 0.5px;
+    background: rgba(0,0,0,0.4); border-radius: 20px;
+    padding: 6px 16px;
+  }
+  .cam-controls {
+    display: flex; align-items: center; justify-content: center; gap: 28px;
+    width: 100%;
+  }
+  .btn-shutter {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: #fff;
+    border: 5px solid rgba(255,255,255,0.5);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.2), 0 4px 20px rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: transform 0.12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-shutter:active { transform: scale(0.92); }
+  .btn-shutter-inner {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: #fff;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .btn-round {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-round:active { transform: scale(0.92); background: rgba(255,255,255,0.1); }
+
+  /* ── FLASH ── */
+  #flash {
+    position: fixed; inset: 0; z-index: 999;
+    background: #fff;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.08s;
+  }
+
+  /* ── RESULT SCREEN ── */
+  #resultScreen { padding: 0; justify-content: flex-end; background: #000; }
+
+  #resultCanvas {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    background: #000;
+  }
+
+  .result-overlay {
+    position: relative; z-index: 20;
+    width: 100%; padding: 16px 20px 40px;
+    background: linear-gradient(to top, rgba(5,13,26,0.97) 0%, rgba(5,13,26,0.6) 60%, transparent 100%);
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+
+  .fish-picker-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px; letter-spacing: 2px; color: var(--foam);
+    text-align: center;
+  }
+  .fish-picker {
+    display: flex; gap: 10px;
+    overflow-x: auto; width: 100%; padding: 4px 0;
+    scrollbar-width: none; -ms-overflow-style: none;
+    justify-content: center; flex-wrap: wrap;
+  }
+  .fish-picker::-webkit-scrollbar { display: none; }
+  .fish-opt {
+    font-size: 36px; cursor: pointer;
+    background: rgba(14,77,110,0.4);
+    border: 2px solid transparent;
+    border-radius: 10px; padding: 6px 8px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .fish-opt.selected {
+    border-color: var(--foam);
+    background: rgba(100,212,242,0.15);
+    transform: scale(1.1);
+  }
+  .fish-opt:active { transform: scale(0.95); }
+
+  .result-btns {
+    display: flex; gap: 12px; width: 100%;
+  }
+  .btn-save {
+    flex: 1;
+    background: linear-gradient(135deg, #f7c948, #e8a820);
+    color: #0a1628;
+    box-shadow: 0 4px 20px rgba(247,201,72,0.35);
+  }
+  .btn-retake {
+    background: rgba(14,77,110,0.6);
+    border: 1px solid var(--border);
+    color: var(--light);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px; letter-spacing: 1px;
+    padding: 14px 20px; border-radius: 10px;
+    cursor: pointer; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+  }
+  .btn-retake:active { transform: scale(0.97); }
+
+  /* ── SIZE SLIDER ── */
+  .size-row {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+  }
+  .size-lbl {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px; letter-spacing: 1px; color: var(--foam);
+    white-space: nowrap;
+  }
+  input[type=range] {
+    flex: 1; -webkit-appearance: none;
+    height: 4px; border-radius: 2px;
+    background: rgba(100,212,242,0.25);
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--foam);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    cursor: pointer;
+  }
+
+  /* ── SAVE STATUS ── */
+  #saveStatus {
+    position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%);
+    z-index: 100;
+    background: rgba(5,13,26,0.92);
+    border: 1px solid var(--foam);
+    border-radius: 24px; padding: 10px 22px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 2px; color: var(--foam);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+  #saveStatus.show { opacity: 1; }
+
+  /* ── ERROR ── */
+  #errorMsg {
+    position: fixed; bottom: 100px; left: 24px; right: 24px;
+    z-index: 200;
+    background: rgba(232,101,74,0.95);
+    border-radius: 12px; padding: 14px 18px;
+    font-size: 13px; line-height: 1.5; color: #fff;
+    text-align: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  #errorMsg.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- Animated background -->
+<div id="bg"></div>
+
+<!-- Flash effect -->
+<div id="flash"></div>
+
+<!-- Save Status -->
+<div id="saveStatus">📥 SAVED TO PHOTOS!</div>
+
+<!-- Error message -->
+<div id="errorMsg" id="errorMsg"></div>
+
+<!-- ═══ TITLE SCREEN ═══ -->
+<div class="screen" id="titleScreen">
+  <div class="logo-wrap">
+    <span class="logo-fish">🐟</span>
+    <div class="logo-title">FISH & GRIP</div>
+    <div class="logo-sub">Show off your catch</div>
+  </div>
+
+  <div class="card" style="max-width:360px">
+    <div class="card-title">📷 Camera Permission</div>
+    <div class="card-body">
+      This app uses your <strong style="color:var(--foam)">front camera</strong> to take a selfie, then overlays a fish right in your hand. Tap below to grant access and start snapping!
+    </div>
+    <button class="btn btn-primary" id="startBtn">
+      <span class="btn-icon">🎣</span>
+      OPEN CAMERA
+    </button>
+    <p class="permission-note">
+      Camera permission required · Photos saved locally to your device<br>
+      Works on iPhone Safari with HTTPS (GitHub Pages)
+    </p>
+  </div>
+
+  <div class="waterline"></div>
+
+  <div style="font-size:11px;color:rgba(232,244,248,0.3);letter-spacing:2px;text-transform:uppercase;text-align:center">
+    No data sent anywhere · 100% on-device
+  </div>
+</div>
+
+<!-- ═══ CAMERA SCREEN ═══ -->
+<div class="screen hidden" id="cameraScreen">
+  <video id="videoEl" autoplay playsinline muted></video>
+  <div class="cam-overlay">
+    <div class="cam-hint">Hold your hand out — the fish will go right in it! 🤙</div>
+    <div class="cam-controls">
+      <div class="btn-round" id="cancelBtn" title="Cancel">✕</div>
+      <div class="btn-shutter" id="shutterBtn">
+        <div class="btn-shutter-inner"></div>
+      </div>
+      <div class="btn-round" id="flipBtn" title="Flip camera">🔄</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESULT SCREEN ═══ -->
+<div class="screen hidden" id="resultScreen">
+  <canvas id="resultCanvas"></canvas>
+  <div class="result-overlay">
+
+    <div class="fish-picker-label">CHOOSE YOUR FISH</div>
+    <div class="fish-picker" id="fishPicker">
+      <div class="fish-opt selected" data-fish="🐟">🐟</div>
+      <div class="fish-opt" data-fish="🐠">🐠</div>
+      <div class="fish-opt" data-fish="🐡">🐡</div>
+      <div class="fish-opt" data-fish="🦈">🦈</div>
+      <div class="fish-opt" data-fish="🐙">🐙</div>
+      <div class="fish-opt" data-fish="🦑">🦑</div>
+      <div class="fish-opt" data-fish="🦞">🦞</div>
+      <div class="fish-opt" data-fish="🦐">🦐</div>
+    </div>
+
+    <div class="size-row">
+      <span class="size-lbl">FISH SIZE</span>
+      <input type="range" id="sizeSlider" min="40" max="160" value="90">
+    </div>
+
+    <div class="result-btns">
+      <button class="btn-retake" id="retakeBtn">↩ RETAKE</button>
+      <button class="btn btn-save btn-primary" id="saveBtn">
+        <span>📥</span> SAVE PHOTO
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   BUBBLES
+═══════════════════════════════════════════ */
+(function(){
+  const bg=document.getElementById('bg');
+  for(let i=0;i<18;i++){
+    const b=document.createElement('div');
+    b.className='bubble';
+    const size=8+Math.random()*30;
+    b.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;bottom:-50px;animation-duration:${8+Math.random()*14}s;animation-delay:${-Math.random()*16}s;`;
+    bg.appendChild(b);
+  }
+})();
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let stream = null;
+let facingMode = 'user';
+let capturedImageData = null;
+let selectedFish = '🐟';
+let fishSize = 90;
+
+/* ═══════════════════════════════════════════
+   SCREEN NAV
+═══════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+/* ═══════════════════════════════════════════
+   ERROR / STATUS
+═══════════════════════════════════════════ */
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function showSaveStatus(msg) {
+  const el = document.getElementById('saveStatus');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ═══════════════════════════════════════════
+   CAMERA
+═══════════════════════════════════════════ */
+async function startCamera(facing) {
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+  const vid = document.getElementById('videoEl');
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: facing },
+        width:  { ideal: 1920 },
+        height: { ideal: 1080 }
+      },
+      audio: false
+    });
+    vid.srcObject = stream;
+    // Mirror only for front camera
+    vid.style.transform = facing === 'user' ? 'scaleX(-1)' : 'none';
+    await vid.play();
+    showScreen('cameraScreen');
+  } catch(err) {
+    const msg = err.name === 'NotAllowedError'
+      ? '⚠️ Camera permission denied. Please allow camera access in Safari Settings → Privacy → Camera, then reload.'
+      : err.name === 'NotFoundError'
+      ? '⚠️ No camera found on this device.'
+      : `⚠️ Camera error: ${err.message}`;
+    showError(msg);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   CAPTURE
+═══════════════════════════════════════════ */
+function doCapture() {
+  const vid = document.getElementById('videoEl');
+  const cvs = document.getElementById('resultCanvas');
+
+  // Flash effect
+  const flash = document.getElementById('flash');
+  flash.style.opacity = '1';
+  setTimeout(() => { flash.style.opacity = '0'; }, 150);
+
+  // Vibrate if supported
+  if (navigator.vibrate) navigator.vibrate([30, 15, 60]);
+
+  // Draw video frame to canvas
+  const vw = vid.videoWidth || window.innerWidth;
+  const vh = vid.videoHeight || window.innerHeight;
+
+  // Output at screen resolution
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cvs.width  = W * dpr;
+  cvs.height = H * dpr;
+  cvs.style.width  = W + 'px';
+  cvs.style.height = H + 'px';
+
+  const ctx = cvs.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // Fill black first
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw video frame — cover-fit + mirror if front cam
+  const scale = Math.max(W / vw, H / vh);
+  const dw = vw * scale;
+  const dh = vh * scale;
+  const dx = (W - dw) / 2;
+  const dy = (H - dh) / 2;
+
+  ctx.save();
+  if (facingMode === 'user') {
+    ctx.translate(W, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(vid, W - dx - dw, dy, dw, dh);
+  } else {
+    ctx.drawImage(vid, dx, dy, dw, dh);
+  }
+  ctx.restore();
+
+  // Store this so we can redraw when fish changes
+  capturedImageData = ctx.getImageData(0, 0, W * dpr, H * dpr);
+
+  // Stop camera
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+
+  // Draw fish overlay
+  drawFishOverlay(cvs, ctx, W, H);
+
+  showScreen('resultScreen');
+}
+
+/* ═══════════════════════════════════════════
+   FISH OVERLAY
+═══════════════════════════════════════════ */
+function drawFishOverlay(cvs, ctx, W, H) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  // Restore photo
+  if (capturedImageData) {
+    ctx.putImageData(capturedImageData, 0, 0);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // restore scale after putImageData resets it
+  }
+
+  // Fish position: roughly lower-center where a hand would be
+  const fishX = W * 0.52;
+  const fishY = H * 0.58;
+  const sz = fishSize;
+
+  // Subtle shadow glow beneath fish
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.65)';
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetY = 8;
+  ctx.font = `${sz}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Slight tilt for realism
+  ctx.translate(fishX, fishY);
+  ctx.rotate(-0.18); // ~10 degrees
+  ctx.fillText(selectedFish, 0, 0);
+  ctx.restore();
+
+  // DEEP HOOK watermark
+  ctx.font = '600 11px Cabin, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('🎣 FISH & GRIP', W - 14, H - 14);
+}
+
+function redrawResult() {
+  const cvs = document.getElementById('resultCanvas');
+  const ctx = cvs.getContext('2d');
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawFishOverlay(cvs, ctx, W, H);
+}
+
+/* ═══════════════════════════════════════════
+   SAVE PHOTO
+═══════════════════════════════════════════ */
+function savePhoto() {
+  const cvs = document.getElementById('resultCanvas');
+
+  try {
+    const dataUrl = cvs.toDataURL('image/jpeg', 0.92);
+
+    // iOS: open image in new tab — user can long-press to save
+    // Best practice for WKWebView / Safari (no direct Photos API in web)
+    const win = window.open();
+    if (win) {
+      win.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <style>
+            body { margin:0; background:#000; display:flex; flex-direction:column;
+                   align-items:center; justify-content:center; min-height:100vh; gap:16px; }
+            img { max-width:100%; max-height:80vh; border-radius:8px; }
+            p { color:#fff; font-family:sans-serif; font-size:15px; text-align:center;
+                padding:0 20px; opacity:0.8; }
+          </style>
+        </head>
+        <body>
+          <img src="${dataUrl}" alt="Fish & Grip Photo">
+          <p>📥 Press and hold the image, then tap <strong>Save to Photos</strong></p>
+        </body>
+        </html>
+      `);
+      win.document.close();
+      showSaveStatus('📸 TAP & HOLD IN NEW TAB TO SAVE!');
+    } else {
+      // Fallback: download link
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = 'FishAndGrip_' + Date.now() + '.jpg';
+      a.click();
+      showSaveStatus('📥 DOWNLOADING...');
+    }
+  } catch(e) {
+    showError('⚠️ Could not save: ' + e.message);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   EVENT WIRING
+   All camera calls are synchronous from
+   touchend/click so iOS Safari allows them.
+═══════════════════════════════════════════ */
+
+// ── TITLE ──
+const startBtn = document.getElementById('startBtn');
+startBtn.addEventListener('touchend', function(e) {
+  e.preventDefault(); e.stopPropagation();
+  facingMode = 'user';
+  startCamera(facingMode);
+}, { passive: false });
+startBtn.addEventListener('click', function() {
+  facingMode = 'user';
+  startCamera(facingMode);
+});
+
+// ── SHUTTER ──
+const shutterBtn = document.getElementById('shutterBtn');
+shutterBtn.addEventListener('touchend', function(e) {
+  e.preventDefault(); e.stopPropagation();
+  doCapture();
+}, { passive: false });
+shutterBtn.addEventListener('click', doCapture);
+
+// ── FLIP ──
+const flipBtn = document.getElementById('flipBtn');
+flipBtn.addEventListener('touchend', function(e) {
+  e.preventDefault(); e.stopPropagation();
+  facingMode = facingMode === 'user' ? 'environment' : 'user';
+  startCamera(facingMode);
+}, { passive: false });
+flipBtn.addEventListener('click', function() {
+  facingMode = facingMode === 'user' ? 'environment' : 'user';
+  startCamera(facingMode);
+});
+
+// ── CANCEL ──
+const cancelBtn = document.getElementById('cancelBtn');
+cancelBtn.addEventListener('touchend', function(e) {
+  e.preventDefault();
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  showScreen('titleScreen');
+}, { passive: false });
+cancelBtn.addEventListener('click', function() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  showScreen('titleScreen');
+});
+
+// ── RETAKE ──
+const retakeBtn = document.getElementById('retakeBtn');
+retakeBtn.addEventListener('touchend', function(e) {
+  e.preventDefault();
+  capturedImageData = null;
+  facingMode = 'user';
+  startCamera(facingMode);
+}, { passive: false });
+retakeBtn.addEventListener('click', function() {
+  capturedImageData = null;
+  facingMode = 'user';
+  startCamera(facingMode);
+});
+
+// ── SAVE ──
+const saveBtn = document.getElementById('saveBtn');
+saveBtn.addEventListener('touchend', function(e) {
+  e.preventDefault();
+  savePhoto();
+}, { passive: false });
+saveBtn.addEventListener('click', savePhoto);
+
+// ── FISH PICKER ──
+document.getElementById('fishPicker').addEventListener('click', function(e) {
+  const opt = e.target.closest('.fish-opt');
+  if (!opt) return;
+  document.querySelectorAll('.fish-opt').forEach(o => o.classList.remove('selected'));
+  opt.classList.add('selected');
+  selectedFish = opt.dataset.fish;
+  redrawResult();
+});
+document.getElementById('fishPicker').addEventListener('touchend', function(e) {
+  const opt = e.target.closest('.fish-opt');
+  if (!opt) return;
+  e.preventDefault();
+  document.querySelectorAll('.fish-opt').forEach(o => o.classList.remove('selected'));
+  opt.classList.add('selected');
+  selectedFish = opt.dataset.fish;
+  redrawResult();
+}, { passive: false });
+
+// ── SIZE SLIDER ──
+document.getElementById('sizeSlider').addEventListener('input', function() {
+  fishSize = parseInt(this.value);
+  redrawResult();
+});
+
+// Prevent scroll / pull-to-refresh
+document.addEventListener('touchmove', e => {
+  if (!e.target.closest('input[type=range]') && !e.target.closest('.fish-picker')) {
+    e.preventDefault();
+  }
+}, { passive: false });
+document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
+</script>
+</body>
+</html>
